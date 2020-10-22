@@ -1,6 +1,10 @@
 import express from 'express'
+import fs from 'fs'
+
 import { pingAsync } from "./ping"
 import { playerIconAsync } from "./icon"
+
+if (!fs.existsSync('cache')) fs.mkdirSync('cache')
 
 const jsend = require('jsend')
 const router: express.Router = express.Router()
