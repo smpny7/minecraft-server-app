@@ -1,6 +1,7 @@
 import express from 'express'
 
 const app: express.Express = express()
+const router1_0: express.Router = require('./v1.0/')
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*")
@@ -10,8 +11,6 @@ app.use((req, res, next) => {
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-
-const router1_0: express.Router = require('./v1.0/')
 
 app.use('/v1.0/', router1_0)
 

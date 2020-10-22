@@ -71,4 +71,4 @@ typings/
 dist/
 
 # original
-cache/*
+*.png

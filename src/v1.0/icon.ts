@@ -1,45 +1,30 @@
 import axios from 'axios'
 import fs from 'fs'
 
-const mc_ping = require('mc-ping-updated')
 const sharp = require('sharp')
-
-export function serverIconAsync(): Promise<any> {
-    return new Promise((resolve, reject) => {
-        mc_ping("jokura-vanila.work", 25565, function (err: any, res: any) {
-            if (err)
-                reject(err)
-            else
-                resolve(Buffer.from(res.favicon.replace(/^data:image\/png;base64,/, ''), 'base64'))
-        })
-    })
-}
 
 export function playerIconAsync(minecraftid: string): Promise<any> {
     return new Promise((resolve, reject) => {
-        const getUUID = 'https://api.mojang.com/users/profiles/minecraft/' + minecraftid
+        if (fs.existsSync("./cache/" + minecraftid + ".png")) {
+            const image = fs.readFileSync("./cache/" + minecraftid + ".png", "binary")
+            resolve(image)
+        }
 
-        axios.get(getUUID).then((res) => {
-            if (typeof res.data.id !== 'undefined') {
-                const getUserData = 'https://sessionserver.mojang.com/session/minecraft/profile/' + res.data.id
-                axios.get(getUserData).then((res) => {
-                    const decode: string = Buffer.from(res.data.properties[0].value, 'base64').toString()
-                    const getIconData = JSON.parse(decode)
-                    const getIconUrl = getIconData.textures.SKIN.url
+        const getUuidUrl = 'https://api.mojang.com/users/profiles/minecraft/' + minecraftid
 
-                    if (!fs.existsSync("./cache/" + minecraftid + ".png")) {
-                        Promise.all([trimming(minecraftid, getIconUrl)]).then(function () {
-                            const image = fs.readFileSync("./cache/" + minecraftid + ".png", "binary")
-                            resolve(image)
-                        })
-                    } else {
-                        const image = fs.readFileSync("./cache/" + minecraftid + ".png", "binary")
-                        resolve(image)
-                    }
+        axios.get(getUuidUrl).then((res) => {
+            if (!res.data.id)
+                reject()
+            const getUserData = 'https://sessionserver.mojang.com/session/minecraft/profile/' + res.data.id
+            axios.get(getUserData).then((res) => {
+                const decode: string = Buffer.from(res.data.properties[0].value, 'base64').toString()
+                const getIconUrl = JSON.parse(decode).textures.SKIN.url
+
+                Promise.all([trimming(minecraftid, getIconUrl)]).then(function () {
+                    const image = fs.readFileSync("./cache/" + minecraftid + ".png", "binary")
+                    resolve(image)
                 })
-            } else {
-                reject('minecraft id does not exist')
-            }
+            })
         })
     })
 }

@@ -26,6 +26,7 @@
     "dependencies": {
         "axios": "^0.19.2",
         "express": "^4.17.1",
+        "jsend": "^1.1.0",
         "mc-ping-updated": "^0.1.1",
         "sharp": "^0.25.4"
     }
